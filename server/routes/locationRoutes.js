@@ -1,9 +1,10 @@
 import express from "express";
+import { getAllLocations } from "../database/locations.js";
 
 const router = express.Router();
 
-// Predefined 10 locations for the ride booking app
-const locations = [
+// Hardcoded locations as fallback
+const hardcodedLocations = [
   { id: 1, name: "City Center", address: "Main Street, Downtown" },
   { id: 2, name: "Airport", address: "Allama Iqbal International Airport" },
   { id: 3, name: "Train Station", address: "Lahore Railway Station" },
@@ -17,18 +18,32 @@ const locations = [
 ];
 
 // GET /api/locations - Get all available locations
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   try {
+    // Try to get from database first
+    const result = await getAllLocations();
+
+    if (result.success && result.locations.length > 0) {
+      res.json({
+        success: true,
+        data: result.locations,
+        message: "Locations retrieved successfully",
+      });
+    } else {
+      // Fallback to hardcoded locations
+      res.json({
+        success: true,
+        data: hardcodedLocations,
+        message: "Locations retrieved successfully (from cache)",
+      });
+    }
+  } catch (error) {
+    // If database fails, use hardcoded locations
+    console.log("Database connection failed, using hardcoded locations");
     res.json({
       success: true,
-      data: locations,
-      message: "Locations retrieved successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to retrieve locations",
-      error: error.message,
+      data: hardcodedLocations,
+      message: "Locations retrieved successfully (from cache)",
     });
   }
 });

@@ -48,13 +48,23 @@ export interface Trip {
   endTime?: string;
   createdAt: string;
   updatedAt: string;
+  // Driver information when populated
+  driver?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  // Passenger information when populated (for driver view)
+  passenger?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
 }
 
 export interface BookTripData {
   fromLocationId: number;
   toLocationId: number;
-  fromLocationName: string;
-  toLocationName: string;
   rideType: "bike" | "car" | "ricksha";
 }
 
@@ -106,13 +116,23 @@ export const tripApi = {
     return response.data;
   },
 
+  getActiveTrips: async () => {
+    const response = await api.get("/trips/active");
+    return response.data;
+  },
+
   getTripDetails: async (tripId: string) => {
     const response = await api.get(`/trips/${tripId}`);
     return response.data;
   },
 
   updateTripStatus: async (tripId: string, status: string) => {
-    const response = await api.patch(`/trips/${tripId}`, { status });
+    const response = await api.put(`/trips/${tripId}/status`, { status });
+    return response.data;
+  },
+
+  acceptTrip: async (tripId: string) => {
+    const response = await api.put(`/trips/${tripId}/accept`);
     return response.data;
   },
 

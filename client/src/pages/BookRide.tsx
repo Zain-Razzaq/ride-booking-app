@@ -65,26 +65,12 @@ export const BookRide: React.FC = () => {
     setIsBooking(true);
 
     try {
-      // Get location names
-      const fromLocation = locations.find(
-        (l) => l.id.toString() === currentLocation
-      );
-      const toLocation = locations.find((l) => l.id.toString() === destination);
-
-      if (!fromLocation || !toLocation) {
-        alert("Invalid location selection");
-        setIsBooking(false);
-        return;
-      }
-
       // Import tripApi dynamically to avoid circular dependencies
       const { tripApi } = await import("@/lib/api");
 
       const tripData = {
         fromLocationId: parseInt(currentLocation),
         toLocationId: parseInt(destination),
-        fromLocationName: fromLocation.name,
-        toLocationName: toLocation.name,
         rideType: rideType as "bike" | "car" | "ricksha",
       };
 
@@ -141,7 +127,13 @@ export const BookRide: React.FC = () => {
                 </label>
                 <select
                   value={currentLocation}
-                  onChange={(e) => setCurrentLocation(e.target.value)}
+                  onChange={(e) => {
+                    setCurrentLocation(e.target.value);
+                    // Clear destination if it's the same as new current location
+                    if (destination === e.target.value) {
+                      setDestination("");
+                    }
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                   required
                 >
@@ -162,17 +154,41 @@ export const BookRide: React.FC = () => {
                 </label>
                 <select
                   value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
+                  onChange={(e) => {
+                    setDestination(e.target.value);
+                    // Clear current location if it's the same as new destination
+                    if (currentLocation === e.target.value) {
+                      setCurrentLocation("");
+                    }
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                   required
                 >
                   <option value="">Select your destination</option>
                   {locations.map((location) => (
-                    <option key={location.id} value={location.id}>
+                    <option
+                      key={location.id}
+                      value={location.id}
+                      disabled={currentLocation === location.id.toString()}
+                      className={
+                        currentLocation === location.id.toString()
+                          ? "text-gray-400"
+                          : ""
+                      }
+                    >
                       {location.name} - {location.address}
+                      {currentLocation === location.id.toString()
+                        ? " (Current Location)"
+                        : ""}
                     </option>
                   ))}
                 </select>
+                {currentLocation && (
+                  <p className="text-xs text-gray-500">
+                    Note: You cannot select the same location as your current
+                    location
+                  </p>
+                )}
               </div>
 
               {/* Ride Type */}

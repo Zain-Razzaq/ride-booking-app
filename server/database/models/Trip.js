@@ -53,6 +53,10 @@ const tripSchema = new mongoose.Schema(
   }
 );
 
+// Create indexes for better query performance
+tripSchema.index({ userId: 1, createdAt: -1 });
+tripSchema.index({ driverId: 1, createdAt: -1 });
+tripSchema.index({ status: 1 });
 
 const Trip = mongoose.model("Trip", tripSchema);
 

@@ -9,7 +9,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LoginForm } from "./components/auth/LoginForm";
 import { RegisterForm } from "./components/auth/RegisterForm";
 import { Dashboard } from "./components/Dashboard";
-import { BookRide, TripHistory } from "./pages";
+import { BookRide, TripHistory, DriverRequests } from "./pages";
 import { Loader2 } from "lucide-react";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -45,10 +45,10 @@ const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
 
-  return isAuthenticated ? (
-    <Navigate to="/dashboard" replace />
-  ) : (
+  return !isAuthenticated ? (
     <>{children}</>
+  ) : (
+    <Navigate to="/dashboard" replace />
   );
 };
 
@@ -122,18 +122,26 @@ const AppContent: React.FC = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/driver-requests"
+        element={
+          <ProtectedRoute>
+            <DriverRequests />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 };
 
-function App() {
+const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <AppContent />
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
-}
+};
 
 export default App;

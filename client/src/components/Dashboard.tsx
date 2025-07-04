@@ -10,6 +10,8 @@ import {
   Bike,
   Truck,
   ArrowRight,
+  UserCheck,
+  Navigation,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./Layout";
@@ -58,15 +60,23 @@ export const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [recentTrips, setRecentTrips] = useState<Trip[]>([]);
+  const [activeTrips, setActiveTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchRecentTrips();
+    fetchDashboardData();
+    // Auto-refresh every 30 seconds for active trips
+    const interval = setInterval(fetchActiveTrips, 30000);
+    return () => clearInterval(interval);
   }, [user]);
+
+  const fetchDashboardData = async () => {
+    await Promise.all([fetchRecentTrips(), fetchActiveTrips()]);
+  };
 
   const fetchRecentTrips = async () => {
     try {
-      setLoading(true);
       let response;
       if (user?.role === "driver") {
         response = await tripApi.getDriverTrips(3); // Get 3 most recent trips
@@ -79,13 +89,135 @@ export const Dashboard: React.FC = () => {
       }
     } catch (error) {
       console.error("Error fetching recent trips:", error);
+    }
+  };
+
+  const fetchActiveTrips = async () => {
+    try {
+      const response = await tripApi.getActiveTrips();
+      if (response.success) {
+        setActiveTrips(response.trips);
+      }
+    } catch (error) {
+      console.error("Error fetching active trips:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleStatusUpdate = async (tripId: string, newStatus: string) => {
+    try {
+      setUpdatingStatus(tripId);
+      const response = await tripApi.updateTripStatus(tripId, newStatus);
+
+      if (response.success) {
+        // Update the active trips list
+        setActiveTrips((prev) =>
+          prev
+            .map((trip) =>
+              trip._id === tripId
+                ? { ...trip, status: newStatus as Trip["status"] }
+                : trip
+            )
+            .filter(
+              (trip) =>
+                // Remove from active if completed or cancelled
+                !["completed", "cancelled"].includes(trip.status)
+            )
+        );
+      } else {
+        alert("Failed to update trip status: " + response.message);
+      }
+    } catch (error) {
+      console.error("Error updating trip status:", error);
+      alert("Failed to update trip status. Please try again.");
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
   const handleBookRide = () => {
     navigate("/book-ride");
+  };
+
+  const renderActiveTrip = (trip: Trip) => {
+    const RideIcon = getRideIcon(trip.rideType);
+    const statusColor = getStatusColor(trip.status);
+    const isDriver = user?.role === "driver";
+    const isUpdating = updatingStatus === trip._id;
+
+    return (
+      <div
+        key={trip._id}
+        className="border-l-4 border-blue-500 bg-blue-50 rounded-lg p-4"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3 flex-1">
+            <div className="p-2 bg-blue-100 rounded-full">
+              <RideIcon className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center space-x-2 text-sm mb-1">
+                <MapPin className="h-3 w-3 text-green-600" />
+                <span className="font-medium">{trip.fromLocationName}</span>
+                <span className="text-gray-400">→</span>
+                <MapPin className="h-3 w-3 text-red-600" />
+                <span className="font-medium">{trip.toLocationName}</span>
+              </div>
+
+              {/* Driver/Passenger Info */}
+              {isDriver && trip.passenger && (
+                <div className="flex items-center space-x-1 text-xs text-gray-600 mb-1">
+                  <User className="h-3 w-3" />
+                  <span>Passenger: {trip.passenger.name}</span>
+                </div>
+              )}
+
+              {!isDriver && trip.driver && (
+                <div className="flex items-center space-x-1 text-xs text-gray-600 mb-1">
+                  <UserCheck className="h-3 w-3" />
+                  <span>Driver: {trip.driver.name}</span>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-2 text-xs">
+                <span className={`font-medium ${statusColor}`}>
+                  {formatStatus(trip.status)}
+                </span>
+                <span>•</span>
+                <span className="text-gray-500">${trip.fare}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons for Drivers */}
+          {isDriver && (
+            <div className="flex space-x-2">
+              {trip.status === "accepted" && (
+                <Button
+                  size="sm"
+                  onClick={() => handleStatusUpdate(trip._id, "in_progress")}
+                  disabled={isUpdating}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isUpdating ? "Starting..." : "Start Trip"}
+                </Button>
+              )}
+              {trip.status === "in_progress" && (
+                <Button
+                  size="sm"
+                  onClick={() => handleStatusUpdate(trip._id, "completed")}
+                  disabled={isUpdating}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {isUpdating ? "Completing..." : "Complete Trip"}
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -119,17 +251,40 @@ export const Dashboard: React.FC = () => {
               </h3>
               <p className="text-gray-600 mb-6">
                 {user?.role === "driver"
-                  ? "Start accepting ride requests and earn money"
-                  : "Book rides and travel safely"}
+                  ? "Accept ride requests and manage your trips"
+                  : "Book rides and track your journeys"}
               </p>
               <Button
                 className="w-full"
-                onClick={user?.role === "driver" ? undefined : handleBookRide}
+                onClick={
+                  user?.role === "driver"
+                    ? () => navigate("/driver-requests")
+                    : handleBookRide
+                }
               >
-                {user?.role === "driver" ? "Go Online" : "Book a Ride"}
+                {user?.role === "driver" ? "View Requests" : "Book a Ride"}
               </Button>
             </div>
           </div>
+
+          {/* Active Trips Section */}
+          {activeTrips.length > 0 && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Active {user?.role === "driver" ? "Rides" : "Trips"}
+                </h3>
+                <div className="flex items-center space-x-2 text-sm text-gray-500">
+                  <Navigation className="h-4 w-4" />
+                  <span>Live Updates</span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {activeTrips.map(renderActiveTrip)}
+              </div>
+            </div>
+          )}
 
           {/* Recent Trips Section */}
           <div className="bg-white rounded-lg shadow p-6">

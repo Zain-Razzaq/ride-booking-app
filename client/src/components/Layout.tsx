@@ -1,7 +1,7 @@
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { User, Car, LogOut, Home, MapPin, Clock } from "lucide-react";
+import { User, Car, LogOut, Home, MapPin, Clock, List } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 interface LayoutProps {
@@ -23,12 +23,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: Home },
-    ...(user?.role !== "driver"
+    ...(user?.role === "driver"
       ? [
+          { path: "/driver-requests", label: "Trip Requests", icon: List },
+          { path: "/trip-history", label: "My Rides", icon: Clock },
+        ]
+      : [
           { path: "/book-ride", label: "Book Ride", icon: MapPin },
           { path: "/trip-history", label: "Trip History", icon: Clock },
-        ]
-      : []),
+        ]),
   ];
 
   return (

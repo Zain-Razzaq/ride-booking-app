@@ -21,8 +21,7 @@ export const register = async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message:
-          "Please provide all required fields: name, email, password",
+        message: "Please provide all required fields: name, email, password",
       });
     }
 
@@ -41,7 +40,7 @@ export const register = async (req, res) => {
       email,
       password: await bcryptjs.hash(password, 10),
     };
-    if (role) userData.role = role; 
+    if (role) userData.role = role;
 
     const result = await createUser(userData);
 
@@ -131,7 +130,7 @@ export const login = async (req, res) => {
   }
 };
 
-// Logout user 
+// Logout user
 export const logout = async (req, res) => {
   try {
     //remove token from cookies
@@ -176,7 +175,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// Verify token 
+// Verify token
 export const verifyToken = async (req, res, next) => {
   try {
     const token = req.cookies.userToken;
@@ -199,7 +198,12 @@ export const verifyToken = async (req, res, next) => {
       });
     }
 
-    req.user = decoded;
+    req.user = {
+      userId: decoded.userId,
+      role: result.user.role,
+      name: result.user.name,
+      email: result.user.email,
+    };
     next();
   } catch (error) {
     if (error.name === "JsonWebTokenError") {
