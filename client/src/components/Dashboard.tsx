@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 import {
   User,
   Car,
@@ -126,11 +127,11 @@ export const Dashboard: React.FC = () => {
             )
         );
       } else {
-        alert("Failed to update trip status: " + response.message);
+        toast.error("Failed to update trip status: " + response.message);
       }
     } catch (error) {
       console.error("Error updating trip status:", error);
-      alert("Failed to update trip status. Please try again.");
+      toast.error("Failed to update trip status. Please try again.");
     } finally {
       setUpdatingStatus(null);
     }

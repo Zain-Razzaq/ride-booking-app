@@ -122,8 +122,9 @@ export const getDriverTrips = async (driverId, limit = null) => {
 export const getTripById = async (tripId) => {
   try {
     const trip = await Trip.findById(tripId)
-      .populate("userId", "_id")
-      .populate("driverId", "_id");
+      .populate("userId", "name email")
+      .populate("driverId", "name email")
+      .lean();
 
     if (!trip) {
       return { success: false, message: "Trip not found" };
@@ -157,8 +158,9 @@ export const updateTripStatus = async (tripId, status, driverId = null) => {
     const trip = await Trip.findByIdAndUpdate(tripId, updateData, {
       new: true,
     })
-      .populate("userId", "_id")
-      .populate("driverId", "_id");
+      .populate("userId", "name email")
+      .populate("driverId", "name email")
+      .lean();
 
     if (!trip) {
       return { success: false, message: "Trip not found" };

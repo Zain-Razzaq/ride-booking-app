@@ -11,6 +11,7 @@ import { RegisterForm } from "./components/auth/RegisterForm";
 import { Dashboard } from "./components/Dashboard";
 import { BookRide, TripHistory, DriverRequests } from "./pages";
 import { Loader2 } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -139,6 +140,30 @@ const App: React.FC = () => {
     <Router>
       <AuthProvider>
         <AppContent />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: "#ffffff",
+              color: "rgb(236, 0, 140)",
+            },
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: "rgb(236, 0, 140)",
+                secondary: "#fff",
+              },
+            },
+            error: {
+              duration: 4000,
+              iconTheme: {
+                primary: "#EF4444",
+                secondary: "#fff",
+              },
+            },
+          }}
+        />
       </AuthProvider>
     </Router>
   );

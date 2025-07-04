@@ -234,11 +234,6 @@ export const updateTripStatus = async (req, res) => {
     const { tripId } = req.params;
     const { status } = req.body;
     const userId = req.user.userId;
-
-    console.log("userId", userId);
-    console.log("tripId", tripId);
-    console.log("status", status);
-
     // Get trip details
     const tripResult = await dbGetTripById(tripId);
     if (!tripResult.success || !tripResult.trip) {

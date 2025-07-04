@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, Car, Bike, Truck, ArrowRight, Loader2 } from "lucide-react";
 import { Layout } from "../components/Layout";
+import toast from "react-hot-toast";
 
 interface Location {
   id: number;
@@ -53,12 +54,12 @@ export const BookRide: React.FC = () => {
     e.preventDefault();
 
     if (!currentLocation || !destination || !rideType) {
-      alert("Please fill in all fields");
+      toast.error("Please fill in all fields");
       return;
     }
 
     if (currentLocation === destination) {
-      alert("Current location and destination cannot be the same");
+      toast.error("Current location and destination cannot be the same");
       return;
     }
 
@@ -77,17 +78,19 @@ export const BookRide: React.FC = () => {
       const response = await tripApi.bookTrip(tripData);
 
       if (response.success) {
-        alert("Ride booked successfully! A driver will be assigned shortly.");
+        toast.success(
+          "Ride booked successfully! A driver will be assigned shortly."
+        );
         // Reset form
         setCurrentLocation("");
         setDestination("");
         setRideType("");
       } else {
-        alert("Failed to book ride: " + response.message);
+        toast.error("Failed to book ride: " + response.message);
       }
     } catch (error) {
       console.error("Booking error:", error);
-      alert("Failed to book ride. Please try again.");
+      toast.error("Failed to book ride. Please try again.");
     } finally {
       setIsBooking(false);
     }

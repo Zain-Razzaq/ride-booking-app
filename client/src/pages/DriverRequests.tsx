@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Layout } from "../components/Layout";
+import toast from "react-hot-toast";
 import {
   MapPin,
   Calendar,
@@ -71,13 +72,15 @@ export const DriverRequests: React.FC = () => {
       if (response.success) {
         // Remove the trip from pending list
         setPendingTrips((prev) => prev.filter((trip) => trip._id !== tripId));
-        alert("Trip accepted successfully! You can now start the ride.");
+        toast.success(
+          "Trip accepted successfully! You can now start the ride."
+        );
       } else {
-        alert("Failed to accept trip: " + response.message);
+        toast.error("Failed to accept trip: " + response.message);
       }
     } catch (error) {
       console.error("Error accepting trip:", error);
-      alert("Failed to accept trip. Please try again.");
+      toast.error("Failed to accept trip. Please try again.");
     } finally {
       setAccepting(null);
     }
