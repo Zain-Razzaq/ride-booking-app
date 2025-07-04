@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import connectDB from "./database/connection.js";
 import authRoutes from "./routes/authRoutes.js";
+import locationRoutes from "./routes/locationRoutes.js";
+import tripRoutes from "./routes/tripRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -25,6 +27,8 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/locations", locationRoutes);
+app.use("/api/trips", tripRoutes);
 
 // Default route
 app.get("/", (req, res) => {

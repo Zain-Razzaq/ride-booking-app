@@ -32,6 +32,32 @@ export interface User {
   updatedAt: string;
 }
 
+export interface Trip {
+  _id: string;
+  userId: string;
+  driverId?: string;
+  fromLocationId: number;
+  toLocationId: number;
+  fromLocationName: string;
+  toLocationName: string;
+  rideType: "bike" | "car" | "ricksha";
+  fare: number;
+  status: "pending" | "accepted" | "in_progress" | "completed" | "cancelled";
+  bookingTime: string;
+  startTime?: string;
+  endTime?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BookTripData {
+  fromLocationId: number;
+  toLocationId: number;
+  fromLocationName: string;
+  toLocationName: string;
+  rideType: "bike" | "car" | "ricksha";
+}
+
 export interface AuthResponse {
   success: boolean;
   message: string;
@@ -57,6 +83,41 @@ export const authApi = {
 
   getProfile: async (): Promise<AuthResponse> => {
     const response = await api.get("/auth/profile");
+    return response.data;
+  },
+};
+
+// Trip API
+export const tripApi = {
+  bookTrip: async (data: BookTripData) => {
+    const response = await api.post("/trips/book", data);
+    return response.data;
+  },
+
+  getUserTrips: async (limit?: number) => {
+    const params = limit ? { limit } : {};
+    const response = await api.get("/trips/user", { params });
+    return response.data;
+  },
+
+  getDriverTrips: async (limit?: number) => {
+    const params = limit ? { limit } : {};
+    const response = await api.get("/trips/driver", { params });
+    return response.data;
+  },
+
+  getTripDetails: async (tripId: string) => {
+    const response = await api.get(`/trips/${tripId}`);
+    return response.data;
+  },
+
+  updateTripStatus: async (tripId: string, status: string) => {
+    const response = await api.patch(`/trips/${tripId}`, { status });
+    return response.data;
+  },
+
+  getPendingTrips: async () => {
+    const response = await api.get("/trips/pending");
     return response.data;
   },
 };

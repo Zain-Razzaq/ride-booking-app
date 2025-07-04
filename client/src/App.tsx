@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LoginForm } from "./components/auth/LoginForm";
 import { RegisterForm } from "./components/auth/RegisterForm";
 import { Dashboard } from "./components/Dashboard";
+import { BookRide, TripHistory } from "./pages";
 import { Loader2 } from "lucide-react";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -102,6 +103,22 @@ const AppContent: React.FC = () => {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/book-ride"
+        element={
+          <ProtectedRoute>
+            <BookRide />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/trip-history"
+        element={
+          <ProtectedRoute>
+            <TripHistory />
           </ProtectedRoute>
         }
       />
