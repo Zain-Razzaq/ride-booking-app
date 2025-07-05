@@ -74,7 +74,7 @@ export const TripHistory: React.FC = () => {
       }
 
       if (response.success) {
-        setTrips(response.trips);
+        setTrips(response.data || []);
       } else {
         setError(response.message);
       }
@@ -177,7 +177,7 @@ export const TripHistory: React.FC = () => {
 
                       <div className="text-right">
                         <div className="text-2xl font-bold text-gray-900">
-                          ${trip.fare}
+                          PKR {trip.fare}
                         </div>
                         <div
                           className={`text-sm font-medium ${

@@ -9,14 +9,31 @@ interface Location {
   address: string;
 }
 
+interface PriceData {
+  distance: number;
+  basePrice: number;
+  distancePrice: number;
+  totalPrice: number;
+  rideType: string;
+}
+
 const rideTypes = [
-  { id: "bike", name: "Bike", icon: Bike, price: "$5-10", time: "5-10 min" },
-  { id: "car", name: "Car", icon: Car, price: "$10-25", time: "10-15 min" },
+  {
+    id: "bike",
+    name: "Bike",
+    icon: Bike,
+    time: "5-10 min",
+  },
+  {
+    id: "car",
+    name: "Car",
+    icon: Car,
+    time: "10-15 min",
+  },
   {
     id: "ricksha",
     name: "Ricksha",
     icon: Truck,
-    price: "$3-8",
     time: "8-12 min",
   },
 ];
@@ -28,25 +45,60 @@ export const BookRide: React.FC = () => {
   const [destination, setDestination] = useState("");
   const [rideType, setRideType] = useState("");
   const [isBooking, setIsBooking] = useState(false);
+  const [priceData, setPriceData] = useState<PriceData | null>(null);
+  const [calculatingPrice, setCalculatingPrice] = useState(false);
 
   useEffect(() => {
     fetchLocations();
   }, []);
 
+  // Calculate price when all fields are selected
+  useEffect(() => {
+    if (currentLocation && destination && rideType) {
+      calculatePrice();
+    } else {
+      setPriceData(null);
+    }
+  }, [currentLocation, destination, rideType]);
+
   const fetchLocations = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/locations");
-      const data = await response.json();
+      // Import locationApi dynamically to avoid circular dependencies
+      const { locationApi } = await import("@/lib/api");
+      const response = await locationApi.getLocations();
 
-      if (data.success) {
-        setLocations(data.data);
+      if (response.success) {
+        setLocations(response.data);
       } else {
-        console.error("Failed to fetch locations:", data.message);
+        console.error("Failed to fetch locations:", response.message);
       }
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const calculatePrice = async () => {
+    try {
+      setCalculatingPrice(true);
+      const { locationApi } = await import("@/lib/api");
+
+      const response = await locationApi.calculatePrice(
+        parseInt(currentLocation),
+        parseInt(destination),
+        rideType
+      );
+
+      if (response.success) {
+        setPriceData(response.data);
+      } else {
+        console.error("Failed to calculate price:", response.message);
+      }
+    } catch (error) {
+      console.error("Error calculating price:", error);
+    } finally {
+      setCalculatingPrice(false);
     }
   };
 
@@ -231,7 +283,6 @@ export const BookRide: React.FC = () => {
                           <h3 className="font-medium text-gray-900">
                             {ride.name}
                           </h3>
-                          <p className="text-sm text-gray-600">{ride.price}</p>
                           <p className="text-xs text-gray-500">{ride.time}</p>
                         </div>
                       </div>
@@ -272,6 +323,55 @@ export const BookRide: React.FC = () => {
                     <span className="text-gray-600">Ride Type:</span>
                     <span className="font-medium capitalize">{rideType}</span>
                   </div>
+                </div>
+              )}
+
+              {/* Price Calculation */}
+              {currentLocation && destination && rideType && (
+                <div className="bg-blue-50 rounded-lg p-4 space-y-3">
+                  <h3 className="font-medium text-gray-900 mb-3">
+                    Trip Details & Pricing
+                  </h3>
+
+                  {calculatingPrice ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-600 mr-2" />
+                      <span className="text-sm text-gray-600">
+                        Calculating price...
+                      </span>
+                    </div>
+                  ) : priceData ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Distance:</span>
+                        <span className="font-medium">
+                          {priceData.distance} km
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Base Fare:</span>
+                        <span className="font-medium">
+                          PKR {priceData.basePrice}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Distance Charge:</span>
+                        <span className="font-medium">
+                          PKR {priceData.distancePrice}
+                        </span>
+                      </div>
+                      <div className="border-t pt-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-gray-900">
+                            Total Fare:
+                          </span>
+                          <span className="font-bold text-lg text-green-600">
+                            PKR {priceData.totalPrice}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               )}
 

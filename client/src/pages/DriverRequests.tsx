@@ -52,7 +52,7 @@ export const DriverRequests: React.FC = () => {
       const response = await tripApi.getPendingTrips();
 
       if (response.success) {
-        setPendingTrips(response.trips);
+        setPendingTrips(response.data || []);
       } else {
         setError(response.message);
       }
@@ -209,7 +209,7 @@ export const DriverRequests: React.FC = () => {
                         <div className="flex items-center space-x-4">
                           <div className="text-right">
                             <div className="text-2xl font-bold text-green-600">
-                              ${trip.fare}
+                              PKR {trip.fare}
                             </div>
                             <div className="text-sm text-gray-500">
                               Estimated fare

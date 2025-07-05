@@ -1,39 +1,39 @@
 import express from "express";
 import {
   bookTrip,
-  getUserTrips,
-  getDriverTrips,
+  getUserTripsController,
+  getDriverTripsController,
+  getPendingTripsController,
+  getActiveTripsController,
   acceptTrip,
-  updateTripStatus,
-  getPendingTrips,
-  getActiveTrips,
+  updateTripStatusController,
 } from "../controllers/tripController.js";
 import { verifyToken } from "../controllers/authController.js";
 
 const router = express.Router();
 
-// Apply auth middleware to all routes
+// All routes require authentication
 router.use(verifyToken);
 
-// POST /api/trips/book - Book a new trip
+// Book a new trip
 router.post("/book", bookTrip);
 
-// GET /api/trips/user - Get user's trips
-router.get("/user", getUserTrips);
+// Get user's trips
+router.get("/user", getUserTripsController);
 
-// GET /api/trips/driver - Get driver's trips
-router.get("/driver", getDriverTrips);
+// Get driver's trips
+router.get("/driver", getDriverTripsController);
 
-// GET /api/trips/pending - Get all pending trips (for drivers)
-router.get("/pending", getPendingTrips);
+// Get pending trips (for drivers)
+router.get("/pending", getPendingTripsController);
 
-// GET /api/trips/active - Get active trips
-router.get("/active", getActiveTrips);
+// Get active trips
+router.get("/active", getActiveTripsController);
 
-// PUT /api/trips/:tripId/accept - Accept a trip (drivers only)
-router.put("/:tripId/accept", acceptTrip);
+// Accept a trip (driver only)
+router.patch("/:tripId/accept", acceptTrip);
 
-// PUT /api/trips/:tripId/status - Update trip status
-router.put("/:tripId/status", updateTripStatus);
+// Update trip status
+router.patch("/:tripId/status", updateTripStatusController);
 
 export default router;

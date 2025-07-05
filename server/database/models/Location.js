@@ -17,14 +17,16 @@ const locationSchema = new mongoose.Schema(
       required: [true, "Location address is required"],
       trim: true,
     },
+    distances: {
+      type: Map,
+      of: Number,
+      default: new Map(),
+    },
   },
   {
     timestamps: true,
   }
 );
-
-// Create indexes for better query performance
-locationSchema.index({ id: 1 });
 
 const Location = mongoose.model("Location", locationSchema);
 

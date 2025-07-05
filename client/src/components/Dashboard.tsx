@@ -66,30 +66,27 @@ export const Dashboard: React.FC = () => {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchDashboardData();
-    // Auto-refresh every 30 seconds for active trips
-    const interval = setInterval(fetchActiveTrips, 30000);
-    return () => clearInterval(interval);
+    fetchRecentTrips();
+    fetchActiveTrips();
   }, [user]);
-
-  const fetchDashboardData = async () => {
-    await Promise.all([fetchRecentTrips(), fetchActiveTrips()]);
-  };
 
   const fetchRecentTrips = async () => {
     try {
+      setLoading(true);
       let response;
       if (user?.role === "driver") {
-        response = await tripApi.getDriverTrips(3); // Get 3 most recent trips
+        response = await tripApi.getDriverTrips();
       } else {
-        response = await tripApi.getUserTrips(3); // Get 3 most recent trips
+        response = await tripApi.getUserTrips();
       }
 
       if (response.success) {
-        setRecentTrips(response.trips);
+        setRecentTrips(response.data || []);
       }
     } catch (error) {
       console.error("Error fetching recent trips:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -97,12 +94,12 @@ export const Dashboard: React.FC = () => {
     try {
       const response = await tripApi.getActiveTrips();
       if (response.success) {
-        setActiveTrips(response.trips);
+        setActiveTrips(response.data || []);
+      } else {
+        console.error("Error fetching active trips:", response.message);
       }
     } catch (error) {
       console.error("Error fetching active trips:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -186,7 +183,7 @@ export const Dashboard: React.FC = () => {
                   {formatStatus(trip.status)}
                 </span>
                 <span>•</span>
-                <span className="text-gray-500">${trip.fare}</span>
+                <span className="text-gray-500">PKR {trip.fare}</span>
               </div>
             </div>
           </div>
@@ -361,7 +358,7 @@ export const Dashboard: React.FC = () => {
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-gray-900">
-                            ${trip.fare}
+                            PKR {trip.fare}
                           </div>
                           <div className={`text-xs font-medium ${statusColor}`}>
                             {formatStatus(trip.status)}

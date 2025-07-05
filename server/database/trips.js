@@ -1,53 +1,42 @@
 import Trip from "./models/Trip.js";
 import User from "./models/User.js";
 import Location from "./models/Location.js";
-
-// Hardcoded locations as fallback
-const hardcodedLocations = [
-  { id: 1, name: "City Center", address: "Main Street, Downtown" },
-  { id: 2, name: "Airport", address: "Allama Iqbal International Airport" },
-  { id: 3, name: "Train Station", address: "Lahore Railway Station" },
-  { id: 4, name: "Emporium Mall", address: "Johar Town" },
-  { id: 5, name: "University", address: "University of Lahore" },
-  { id: 6, name: "Jinnah Hospital", address: "Jinnah Hospital" },
-  { id: 7, name: "Gadaffi Stadium", address: "Gadaffi Stadium" },
-  { id: 8, name: "Faisal Town", address: "Faisal Town" },
-  { id: 9, name: "DHA Raya", address: "DHA Raya" },
-  { id: 10, name: "Lake City", address: "Lake City" },
-];
+import { getLocationById } from "./locations.js";
 
 // Helper function to populate trip with location names
 const populateTripWithLocations = async (trip) => {
-  let fromLocation, toLocation;
-
   try {
-    // Try to get from database first
-    [fromLocation, toLocation] = await Promise.all([
-      Location.findOne({ id: trip.fromLocationId }),
-      Location.findOne({ id: trip.toLocationId }),
+    // Get location names from database
+    const [fromLocationResult, toLocationResult] = await Promise.all([
+      getLocationById(trip.fromLocationId),
+      getLocationById(trip.toLocationId),
     ]);
+
+    let fromLocation = null;
+    let toLocation = null;
+
+    if (fromLocationResult.success && fromLocationResult.location) {
+      fromLocation = fromLocationResult.location;
+    }
+
+    if (toLocationResult.success && toLocationResult.location) {
+      toLocation = toLocationResult.location;
+    }
+
+    // Add location names to trip object
+    const tripObj = trip.toObject ? trip.toObject() : trip;
+    tripObj.fromLocationName = fromLocation?.name || "Unknown Location";
+    tripObj.toLocationName = toLocation?.name || "Unknown Location";
+
+    return tripObj;
   } catch (error) {
-    console.log(
-      "Database connection failed, using hardcoded locations for trip population"
-    );
+    console.error("Error populating trip with locations:", error);
+    // Return trip with default location names
+    const tripObj = trip.toObject ? trip.toObject() : trip;
+    tripObj.fromLocationName = "Unknown Location";
+    tripObj.toLocationName = "Unknown Location";
+    return tripObj;
   }
-
-  // Fallback to hardcoded locations if database fails
-  if (!fromLocation) {
-    fromLocation = hardcodedLocations.find((l) => l.id === trip.fromLocationId);
-  }
-  if (!toLocation) {
-    toLocation = hardcodedLocations.find((l) => l.id === trip.toLocationId);
-  }
-
-  // Handle both mongoose documents and lean objects
-  const tripObject = trip.toObject ? trip.toObject() : trip;
-
-  return {
-    ...tripObject,
-    fromLocationName: fromLocation?.name || "Unknown",
-    toLocationName: toLocation?.name || "Unknown",
-  };
 };
 
 // Create a new trip
@@ -56,86 +45,109 @@ export const createTrip = async (tripData) => {
     const trip = new Trip(tripData);
     await trip.save();
 
-    // Populate user data
-    await trip.populate("userId", "name email");
+    // Populate with location names
+    const populatedTrip = await populateTripWithLocations(trip);
 
-    // Add location names
-    const tripWithLocations = await populateTripWithLocations(trip);
-
-    return { success: true, trip: tripWithLocations };
+    return {
+      success: true,
+      trip: populatedTrip,
+      message: "Trip created successfully",
+    };
   } catch (error) {
-    return { success: false, message: error.message };
+    console.error("Error creating trip:", error);
+    return {
+      success: false,
+      message: "Failed to create trip",
+      error: error.message,
+    };
   }
 };
 
-// Get user's trips with location names
-export const getUserTrips = async (userId, limit = null) => {
+// Get trips for a specific user
+export const getUserTrips = async (userId) => {
   try {
-    let query = Trip.find({ userId }).sort({ createdAt: -1 });
-
-    if (limit) {
-      query = query.limit(limit);
-    }
-
-    const trips = await query
+    const trips = await Trip.find({ userId })
       .populate("userId", "name email")
       .populate("driverId", "name email")
-      .lean();
+      .sort({ createdAt: -1 });
 
-    // Add location names to all trips
-    const tripsWithLocations = await Promise.all(
-      trips.map(populateTripWithLocations)
+    // Populate with location names
+    const populatedTrips = await Promise.all(
+      trips.map((trip) => populateTripWithLocations(trip))
     );
 
-    return { success: true, trips: tripsWithLocations };
+    return {
+      success: true,
+      trips: populatedTrips,
+      message: "User trips retrieved successfully",
+    };
   } catch (error) {
-    return { success: false, message: error.message };
+    console.error("Error getting user trips:", error);
+    return {
+      success: false,
+      message: "Failed to get user trips",
+      error: error.message,
+    };
   }
 };
 
-// Get driver's trips with location names
-export const getDriverTrips = async (driverId, limit = null) => {
+// Get trips for a specific driver
+export const getDriverTrips = async (driverId) => {
   try {
-    let query = Trip.find({ driverId }).sort({ createdAt: -1 });
-
-    if (limit) {
-      query = query.limit(limit);
-    }
-
-    const trips = await query
+    const trips = await Trip.find({ driverId })
       .populate("userId", "name email")
       .populate("driverId", "name email")
-      .lean();
+      .sort({ createdAt: -1 });
 
-    // Add location names to all trips
-    const tripsWithLocations = await Promise.all(
-      trips.map(populateTripWithLocations)
+    // Populate with location names
+    const populatedTrips = await Promise.all(
+      trips.map((trip) => populateTripWithLocations(trip))
     );
 
-    return { success: true, trips: tripsWithLocations };
+    return {
+      success: true,
+      trips: populatedTrips,
+      message: "Driver trips retrieved successfully",
+    };
   } catch (error) {
-    return { success: false, message: error.message };
+    console.error("Error getting driver trips:", error);
+    return {
+      success: false,
+      message: "Failed to get driver trips",
+      error: error.message,
+    };
   }
 };
 
-// Get trip by ID with location names
+// Get a specific trip by ID
 export const getTripById = async (tripId) => {
   try {
     const trip = await Trip.findById(tripId)
       .populate("userId", "name email")
-      .populate("driverId", "name email")
-      .lean();
+      .populate("driverId", "name email");
 
     if (!trip) {
-      return { success: false, message: "Trip not found" };
+      return {
+        success: false,
+        message: "Trip not found",
+      };
     }
 
-    // Add location names
-    const tripWithLocations = await populateTripWithLocations(trip);
+    // Populate with location names
+    const populatedTrip = await populateTripWithLocations(trip);
 
-    return { success: true, trip: tripWithLocations };
+    return {
+      success: true,
+      trip: populatedTrip,
+      message: "Trip retrieved successfully",
+    };
   } catch (error) {
-    return { success: false, message: error.message };
+    console.error("Error getting trip by ID:", error);
+    return {
+      success: false,
+      message: "Failed to get trip",
+      error: error.message,
+    };
   }
 };
 
@@ -144,92 +156,95 @@ export const updateTripStatus = async (tripId, status, driverId = null) => {
   try {
     const updateData = { status };
 
-    if (driverId) {
+    if (driverId && status === "accepted") {
       updateData.driverId = driverId;
-    }
-
-    // Add timestamp fields based on status
-    if (status === "in_progress") {
-      updateData.startTime = new Date();
-    } else if (status === "completed" || status === "cancelled") {
-      updateData.endTime = new Date();
     }
 
     const trip = await Trip.findByIdAndUpdate(tripId, updateData, {
       new: true,
     })
       .populate("userId", "name email")
-      .populate("driverId", "name email")
-      .lean();
+      .populate("driverId", "name email");
 
     if (!trip) {
-      return { success: false, message: "Trip not found" };
+      return {
+        success: false,
+        message: "Trip not found",
+      };
     }
 
-    // Add location names
-    const tripWithLocations = await populateTripWithLocations(trip);
+    // Populate with location names
+    const populatedTrip = await populateTripWithLocations(trip);
 
-    return { success: true, trip: tripWithLocations };
+    return {
+      success: true,
+      trip: populatedTrip,
+      message: "Trip status updated successfully",
+    };
   } catch (error) {
-    return { success: false, message: error.message };
+    console.error("Error updating trip status:", error);
+    return {
+      success: false,
+      message: "Failed to update trip status",
+      error: error.message,
+    };
   }
 };
 
-// Get all pending trips with location names
+// Get all pending trips
 export const getPendingTrips = async () => {
   try {
     const trips = await Trip.find({ status: "pending" })
-      .sort({ createdAt: -1 })
       .populate("userId", "name email")
-      .lean();
+      .sort({ createdAt: -1 });
 
-    // Add location names to all trips
-    const tripsWithLocations = await Promise.all(
-      trips.map(populateTripWithLocations)
+    // Populate with location names
+    const populatedTrips = await Promise.all(
+      trips.map((trip) => populateTripWithLocations(trip))
     );
 
-    return { success: true, trips: tripsWithLocations };
+    return {
+      success: true,
+      trips: populatedTrips,
+      message: "Pending trips retrieved successfully",
+    };
   } catch (error) {
-    return { success: false, message: error.message };
+    console.error("Error getting pending trips:", error);
+    return {
+      success: false,
+      message: "Failed to get pending trips",
+      error: error.message,
+    };
   }
 };
 
-// Get active trips (accepted, in_progress) with location names
-export const getActiveTrips = async (userId, userRole) => {
+// Get active trips for a user
+export const getActiveTrips = async (userId) => {
   try {
-    let query = {
+    const trips = await Trip.find({
+      $or: [{ userId: userId }, { driverId: userId }],
       status: { $in: ["accepted", "in_progress"] },
-    };
-
-    // Filter based on user role
-    if (userRole === "driver") {
-      query.driverId = userId;
-    } else {
-      query.userId = userId;
-    }
-
-    const trips = await Trip.find(query)
-      .sort({ createdAt: -1 })
+    })
       .populate("userId", "name email")
       .populate("driverId", "name email")
-      .lean();
+      .sort({ createdAt: -1 });
 
-    // Add location names and passenger/driver info
-    const tripsWithLocations = await Promise.all(
-      trips.map(async (trip) => {
-        const tripWithLocations = await populateTripWithLocations(trip);
-
-        // Add passenger/driver info for easier access in frontend
-        return {
-          ...tripWithLocations,
-          passenger: tripWithLocations.userId,
-          driver: tripWithLocations.driverId,
-        };
-      })
+    // Populate with location names
+    const populatedTrips = await Promise.all(
+      trips.map((trip) => populateTripWithLocations(trip))
     );
 
-    return { success: true, trips: tripsWithLocations };
+    return {
+      success: true,
+      trips: populatedTrips,
+      message: "Active trips retrieved successfully",
+    };
   } catch (error) {
-    return { success: false, message: error.message };
+    console.error("Error getting active trips:", error);
+    return {
+      success: false,
+      message: "Failed to get active trips",
+      error: error.message,
+    };
   }
 };

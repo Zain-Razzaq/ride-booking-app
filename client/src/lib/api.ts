@@ -127,17 +127,36 @@ export const tripApi = {
   },
 
   updateTripStatus: async (tripId: string, status: string) => {
-    const response = await api.put(`/trips/${tripId}/status`, { status });
+    const response = await api.patch(`/trips/${tripId}/status`, { status });
     return response.data;
   },
 
   acceptTrip: async (tripId: string) => {
-    const response = await api.put(`/trips/${tripId}/accept`);
+    const response = await api.patch(`/trips/${tripId}/accept`);
     return response.data;
   },
 
   getPendingTrips: async () => {
     const response = await api.get("/trips/pending");
+    return response.data;
+  },
+};
+
+// Location API
+export const locationApi = {
+  getLocations: async () => {
+    const response = await api.get("/locations");
+    return response.data;
+  },
+
+  calculatePrice: async (
+    fromLocationId: number,
+    toLocationId: number,
+    rideType: string
+  ) => {
+    const response = await api.get("/locations/calculate-price", {
+      params: { fromLocationId, toLocationId, rideType },
+    });
     return response.data;
   },
 };
