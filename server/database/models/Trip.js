@@ -61,3 +61,4 @@ tripSchema.index({ status: 1 });
 const Trip = mongoose.model("Trip", tripSchema);
 
 export default Trip;
+ 

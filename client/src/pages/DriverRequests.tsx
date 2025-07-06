@@ -17,6 +17,10 @@ import { useAuth } from "@/context/AuthContext";
 import { tripApi, type Trip } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
+/**
+ * DriverRequests component - Shows pending trip requests for drivers to accept
+ */
+
 const getRideIcon = (rideType: string) => {
   switch (rideType) {
     case "car":

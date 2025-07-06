@@ -3,6 +3,10 @@ import { MapPin, Car, Bike, Truck, ArrowRight, Loader2 } from "lucide-react";
 import { Layout } from "../components/Layout";
 import toast from "react-hot-toast";
 
+/**
+ * BookRide component - Trip booking form with real-time price calculation
+ */
+
 interface Location {
   id: number;
   name: string;

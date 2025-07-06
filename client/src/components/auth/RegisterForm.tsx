@@ -36,6 +36,9 @@ interface RegisterFormProps {
   onSwitchToLogin: () => void;
 }
 
+/**
+ * RegisterForm component - User registration form with role selection
+ */
 export const RegisterForm: React.FC<RegisterFormProps> = ({
   onSwitchToLogin,
 }) => {

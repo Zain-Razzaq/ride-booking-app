@@ -12,6 +12,10 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { tripApi, type Trip } from "@/lib/api";
 
+/**
+ * TripHistory component - Display user/driver trip history with status and fare details
+ */
+
 const getRideIcon = (rideType: string) => {
   switch (rideType) {
     case "car":

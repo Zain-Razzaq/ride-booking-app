@@ -10,30 +10,34 @@ import {
 } from "../controllers/tripController.js";
 import { verifyToken } from "../controllers/authController.js";
 
+/**
+ * Trip Routes - All endpoints for trip management
+ */
+
 const router = express.Router();
 
 // All routes require authentication
 router.use(verifyToken);
 
-// Book a new trip
+// Create new trip booking
 router.post("/book", bookTrip);
 
-// Get user's trips
+// Retrieve user's trip history
 router.get("/user", getUserTripsController);
 
-// Get driver's trips
+// Retrieve driver's trip history
 router.get("/driver", getDriverTripsController);
 
-// Get pending trips (for drivers)
+// Retrieve trips awaiting driver acceptance
 router.get("/pending", getPendingTripsController);
 
-// Get active trips
+// Retrieve currently active trips
 router.get("/active", getActiveTripsController);
 
-// Accept a trip (driver only)
+// Driver accepts a trip request
 router.patch("/:tripId/accept", acceptTrip);
 
-// Update trip status
+// Update trip status (in_progress, completed, cancelled)
 router.patch("/:tripId/status", updateTripStatusController);
 
 export default router;

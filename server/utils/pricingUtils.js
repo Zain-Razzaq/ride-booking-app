@@ -1,3 +1,7 @@
+/**
+ * Pricing Utilities - Core business logic for fare calculation and distance extraction
+ */
+
 // Pricing configuration
 const PRICING_CONFIG = {
   basePrices: {
@@ -12,6 +16,7 @@ const PRICING_CONFIG = {
   },
 };
 
+// Calculate trip fare based on distance and vehicle type
 export const calculateTripFare = (distance, rideType) => {
   // Validate inputs
   if (!distance || distance <= 0) {
@@ -36,7 +41,7 @@ export const calculateTripFare = (distance, rideType) => {
   };
 };
 
-
+// Extract distance between two locations from location data
 export const getDistanceBetweenLocations = (fromLocation, toLocationId) => {
   if (!fromLocation || !fromLocation.distances) {
     throw new Error("Invalid from location or missing distances data");

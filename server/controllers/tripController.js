@@ -13,7 +13,11 @@ import {
   getDistanceBetweenLocations,
 } from "../utils/pricingUtils.js";
 
-// Book a new trip
+/**
+ * Trip Controller - Handles all trip-related operations
+ */
+
+// Create a new trip with distance-based pricing
 export const bookTrip = async (req, res) => {
   try {
     const { fromLocationId, toLocationId, rideType } = req.body;
@@ -103,7 +107,7 @@ export const bookTrip = async (req, res) => {
   }
 };
 
-// Get user trips
+// Retrieve all trips for a specific user
 export const getUserTripsController = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -132,7 +136,7 @@ export const getUserTripsController = async (req, res) => {
   }
 };
 
-// Get driver trips
+// Retrieve all trips for a specific driver
 export const getDriverTripsController = async (req, res) => {
   try {
     const driverId = req.user.userId;
@@ -161,7 +165,7 @@ export const getDriverTripsController = async (req, res) => {
   }
 };
 
-// Get pending trips
+// Retrieve all trips awaiting driver acceptance
 export const getPendingTripsController = async (req, res) => {
   try {
     const result = await getPendingTrips();
@@ -189,7 +193,7 @@ export const getPendingTripsController = async (req, res) => {
   }
 };
 
-// Get active trips
+// Retrieve all trips currently in progress
 export const getActiveTripsController = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -218,7 +222,7 @@ export const getActiveTripsController = async (req, res) => {
   }
 };
 
-// Accept trip
+// Driver accepts a pending trip request
 export const acceptTrip = async (req, res) => {
   try {
     const { tripId } = req.params;
@@ -270,7 +274,7 @@ export const acceptTrip = async (req, res) => {
   }
 };
 
-// Update trip status
+// Update trip status (accepted, in_progress, completed, cancelled)
 export const updateTripStatusController = async (req, res) => {
   try {
     const { tripId } = req.params;

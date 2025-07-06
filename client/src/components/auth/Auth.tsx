@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
 
+/**
+ * Auth component - Main authentication wrapper with login/register toggle
+ */
 export const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
 

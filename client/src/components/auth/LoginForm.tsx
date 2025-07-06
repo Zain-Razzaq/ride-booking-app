@@ -19,6 +19,9 @@ interface LoginFormProps {
   onSwitchToRegister: () => void;
 }
 
+/**
+ * LoginForm component - User login form with validation
+ */
 export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);

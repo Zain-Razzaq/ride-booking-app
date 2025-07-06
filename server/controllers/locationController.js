@@ -4,7 +4,11 @@ import {
   getDistanceBetweenLocations,
 } from "../utils/pricingUtils.js";
 
-// Get all locations
+/**
+ * Location Controller - Handles location data and price calculations
+ */
+
+// Retrieve all available pickup/drop locations
 export const getLocations = async (req, res) => {
   try {
     const result = await getAllLocations();
@@ -31,7 +35,7 @@ export const getLocations = async (req, res) => {
   }
 };
 
-// Calculate price based on distance and ride type
+// Calculate trip fare based on distance and vehicle type
 export const calculatePrice = async (req, res) => {
   try {
     const { fromLocationId, toLocationId, rideType } = req.query;

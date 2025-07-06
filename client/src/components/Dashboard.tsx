@@ -18,6 +18,11 @@ import { useNavigate } from "react-router-dom";
 import { Layout } from "./Layout";
 import { tripApi, type Trip } from "@/lib/api";
 
+/**
+ * Dashboard component - Main dashboard showing user trips and quick actions
+ */
+
+// Helper function to get vehicle icon
 const getRideIcon = (rideType: string) => {
   switch (rideType) {
     case "car":

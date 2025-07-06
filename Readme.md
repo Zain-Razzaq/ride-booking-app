@@ -14,19 +14,19 @@ A full-stack ride booking application with distance-based pricing, real-time tri
 
 ## Tech Stack
 
-**Frontend:** React.js with TypeScript, Tailwind CSS for styling
-**Backend:** Node.js with Express.js for REST API
-**Database:** MongoDB with Mongoose ODM
-**Authentication:** JWT tokens for secure user sessions
+- **Frontend:** React.js with TypeScript, Tailwind CSS for styling
+- **Backend:** Node.js with Express.js for REST API
+- **Database:** MongoDB with Mongoose ODM
+- **Authentication:** JWT tokens for secure user sessions
 
 **Why MERN?** Chosen because I have experience with this stack and it provides a cohesive JavaScript ecosystem for rapid development.
 
 ## Key Assumptions
 
-**Currency:** All pricing is in PKR (Pakistani Rupees) assuming Pakistan market
-**Locations:** Pre-defined locations in Lahore with fixed distance matrix
-**User Roles:** Simple passenger/driver distinction without complex role management
-**Pricing Model:** Fixed base price + per-km rate for each vehicle type
+- **Currency:** All pricing is in PKR (Pakistani Rupees) assuming Pakistan market
+- **Locations:** Pre-defined locations in Lahore with fixed distance matrix
+- **User Roles:** Simple passenger/driver distinction without complex role management
+- **Pricing Model:** Fixed base price + per-km rate for each vehicle type
 
 ## Data Model
 
@@ -65,6 +65,7 @@ Location
    ```bash
    npm install
    cd client && npm install
+   cd ../server && npm install
    ```
 
 3. **Environment Variables:**

@@ -4,12 +4,16 @@ import {
   calculatePrice,
 } from "../controllers/locationController.js";
 
+/**
+ * Location Routes - Endpoints for location data and pricing
+ */
+
 const router = express.Router();
 
-// Get all locations
+// Retrieve all available pickup/drop locations
 router.get("/", getLocations);
 
-// Calculate price based on distance and ride type
+// Calculate trip fare based on distance and vehicle type
 router.get("/calculate-price", calculatePrice);
 
 export default router;

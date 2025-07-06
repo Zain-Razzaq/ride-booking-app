@@ -8,6 +8,9 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+/**
+ * Layout component - Main app wrapper with navigation header
+ */
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();

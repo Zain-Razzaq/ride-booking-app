@@ -5,14 +5,18 @@ import bcryptjs from "bcryptjs";
 
 dotenv.config();
 
-// Generate JWT token
+/**
+ * Auth Controller - Handles user authentication and authorization
+ */
+
+// Create JWT token for authenticated users
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 };
 
-// Register new user
+// Create new user account with hashed password
 export const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -74,7 +78,7 @@ export const register = async (req, res) => {
   }
 };
 
-// Login user
+// Authenticate user and create session
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -130,7 +134,7 @@ export const login = async (req, res) => {
   }
 };
 
-// Logout user
+// Clear user session and logout
 export const logout = async (req, res) => {
   try {
     //remove token from cookies
@@ -175,7 +179,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// Verify token
+// Middleware to verify JWT token and authenticate requests
 export const verifyToken = async (req, res, next) => {
   try {
     const token = req.cookies.userToken;
